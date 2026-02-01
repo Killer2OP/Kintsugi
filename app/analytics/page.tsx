@@ -621,8 +621,8 @@ export default function AnalyticsPageEnhanced() {
                     </div>
                   </div>
 
-                  {metricsData?.effectiveness_by_type &&
-                    typeof metricsData.effectiveness_by_type === "object" && (
+                  {Boolean(metricsData?.effectiveness_by_type &&
+                    typeof metricsData.effectiveness_by_type === "object") && (
                       <div>
                         <h4 className="font-semibold text-lg mb-4 flex items-center gap-2">
                           <Sparkles className="h-5 w-5 text-violet-500" />
