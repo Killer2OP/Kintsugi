@@ -1,0 +1,85 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// Main table for workflow runs and failures
+model WorkflowRun {
+  id              Int       @id @default(autoincrement())
+  repoName        String    @map("repo_name")
+  owner           String
+  runId           BigInt    @map("run_id")
+  workflowName    String?   @map("workflow_name")
+  status          String
+  conclusion      String?
+  errorLog        String?   @map("error_log")
+  suggestedFix    String?   @map("suggested_fix")
+  fixStatus       String?   @default("pending") @map("fix_status")
+  confidenceScore Float?    @map("confidence_score")
+  errorCategory   String?   @map("error_category")
+  fixComplexity   String?   @map("fix_complexity")
+  analysisResult  String?   @map("analysis_result")
+  prUrl           String?   @map("pr_url")
+  fixBranch       String?   @map("fix_branch")
+  fixError        String?   @map("fix_error")
+  createdAt       DateTime  @default(now()) @map("created_at")
+  updatedAt       DateTime  @updatedAt @map("updated_at")
+
+  // Relations
+  portiaPlan      PortiaPlan?
+
+  @@unique([repoName, owner, runId])
+  @@map("workflow_runs")
+}
+
+// Portia AI plan tracking
+model PortiaPlan {
+  id             Int       @id @default(autoincrement())
+  planId         String    @unique @map("plan_id")
+  workflowRunId  Int?      @unique @map("workflow_run_id")
+  status         String
+  stepsCompleted Int       @default(0) @map("steps_completed")
+  totalSteps     Int       @default(0) @map("total_steps")
+  errorMessage   String?   @map("error_message")
+  createdAt      DateTime  @default(now()) @map("created_at")
+  updatedAt      DateTime  @updatedAt @map("updated_at")
+
+  // Relations
+  workflowRun    WorkflowRun? @relation(fields: [workflowRunId], references: [id])
+  clarifications Clarification[]
+
+  @@map("portia_plans")
+}
+
+// Plan clarification requests
+model Clarification {
+  id           Int       @id @default(autoincrement())
+  planId       String    @map("plan_id")
+  question     String
+  response     String?
+  responseType String?   @map("response_type")
+  status       String    @default("pending")
+  createdAt    DateTime  @default(now()) @map("created_at")
+  updatedAt    DateTime  @updatedAt @map("updated_at")
+
+  // Relations
+  plan         PortiaPlan @relation(fields: [planId], references: [planId])
+
+  @@map("clarifications")
+}
+
+// ML learned patterns storage
+model LearnedPattern {
+  id           Int       @id @default(autoincrement())
+  patternsData Json      @map("patterns_data")
+  updatedAt    DateTime  @default(now()) @map("updated_at")
+
+  @@map("learned_patterns")
+}
