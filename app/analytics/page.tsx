@@ -630,7 +630,7 @@ export default function AnalyticsPageEnhanced() {
                         </h4>
                         <div className="space-y-3">
                           {Object.entries(
-                            metricsData.effectiveness_by_type as Record<
+                            metricsData!.effectiveness_by_type as Record<
                               string,
                               unknown
                             >,
